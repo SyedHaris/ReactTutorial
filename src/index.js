@@ -5,19 +5,31 @@ import './index.css';
   function Square(props)
   {
     return (
-      <button className="square" onClick={ props.onClick } >
+      <button className="square" onClick={ props.onClick }  style = { props.style }>
         { props.value }
       </button>
     );
   }
   
   class Board extends React.Component {
-
+  
     renderSquare(i) {
+    
+      let style = null;
+
+      if(this.props.winner && winningMoves.includes(i))
+      {
+
+        style = {
+          border: '2px solid black'
+        };
+      }
+
       return <Square 
                     key = {i}
                     value = { this.props.squares[i] } 
                     onClick = { () => this.props.onClick(i) }
+                    style = { style }
                     />;
     }
   
@@ -63,6 +75,7 @@ import './index.css';
         xIsNext: true,
         checked: 1
       };
+      winningMoves = [];
 
     }
 
@@ -76,6 +89,7 @@ import './index.css';
       if (calculateWinner(squares) || squares[i]) {
         return;
       }
+
 
       squares[i] = this.state.xIsNext ? 'X' : 'O';
 
@@ -98,7 +112,7 @@ import './index.css';
 
     }
 
-    sort(order, moves){
+    sort(order){
       
             if(order === ASC)
             {
@@ -144,16 +158,21 @@ import './index.css';
       });
   
       let status;
+
       if (winner) {
         status = 'Winner: ' + winner;
-      } else {
+      }
+      else if(!current.squares.includes(null)){
+        status = 'Match drawn';
+      }
+      else {
         status = 'Next player: ' + (this.state.xIsNext ? 'X' : 'O');
       }
   let sort;
   
   sort =  (
     <div>
-      <p>Order moves:</p>
+      <p>Order moves by:</p>
       <form>
       <label>Ascending</label>
       <input type="radio"   name="sort"  checked={ this.state.checked ? true : false } onClick = { () => this.sort(ASC, moves) }/>   
@@ -179,6 +198,7 @@ import './index.css';
             <Board 
               squares = { current.squares }
               onClick = { i => this.handleClick(i) }
+              winner = { winner }
             />
           </div>
           <div className="game-info">
@@ -191,68 +211,6 @@ import './index.css';
     }
   }
 
-  class Sort extends React.Component {
-
-    constructor(props){
-      super(props);
-      this.state = {
-        check: 1
-      };
-    }
-
-    handleClick(order, moves){
-
-      if(order === ASC)
-      {
-        this.setState(
-          {
-            check: 1
-          }
-        );
-      }
-      
-      else if(order === DESC)
-      {
-        this.setState(
-          {
-            check: 0
-          }
-        );
-      }
-
-      moves.reverse();
-
-    }
-
-    renderRadioBtn(){
-      if(this.state.check)
-          return (
-            <div>
-              <label>Ascending</label>
-              <input type="radio"  checked onClick = { () => this.handleClick(ASC, this.props.moves) }/>   
-              <label>Descending</label>         
-              <input type="radio" onClick = { () => this.handleClick(DESC, this.props.moves) } />
-            </div>
-        
-          );
-        else
-            return (
-              <div>
-                <label>Ascending</label>
-                <input type="radio"   onClick = { () => this.handleClick(ASC, this.props.moves) }/>   
-                <label>Descending</label>         
-                <input type="radio" checked onClick = { () => this.handleClick(DESC, this.props.moves) } />
-              </div>
-          
-            );
-    }
-
-    render(){
-      return this.renderRadioBtn();
-    }
-
-
-  } 
   
   // ========================================
 
@@ -272,6 +230,7 @@ import './index.css';
     for (let i = 0; i < lines.length; i++) {
       const [a, b, c] = lines[i];
       if (squares[a] && squares[a] === squares[b] && squares[a] === squares[c]) {
+        winningMoves = lines[i];
         return squares[a];
       }
     }
@@ -287,6 +246,8 @@ import './index.css';
 
     return colRow[index];
   }
+
+  var winningMoves = [];
   
   ReactDOM.render(
     <Game />,
